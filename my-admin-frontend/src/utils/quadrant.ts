@@ -1,6 +1,6 @@
-import { Quadrant, type QuadrantMeta } from '@/types/todo'
+import { Quadrant, type QuadrantMeta as QuadrantMetaType } from '@/types/todo'
 
-export const QuadrantMeta: Record<Quadrant, QuadrantMeta> = {
+export const QuadrantMeta: Record<Quadrant, QuadrantMetaType> = {
   [Quadrant.IMPORTANT_URGENT]: {
     id: Quadrant.IMPORTANT_URGENT,
     name: '重要且紧急',

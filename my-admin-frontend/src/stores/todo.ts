@@ -34,6 +34,8 @@ export const useTodoStore = defineStore('todo', () => {
       return {
         ...meta,
         quadrant: q as Quadrant,
+        quadrantName: meta.name,
+        quadrantDescription: meta.description,
         uncompletedTodos: data?.uncompletedTodos || [],
         completedTodos: data?.completedTodos || [],
         hasCompleted: (data?.completedTodos?.length || 0) > 0,

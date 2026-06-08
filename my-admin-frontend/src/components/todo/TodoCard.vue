@@ -5,6 +5,7 @@
       'todo-card--completed': completed,
       'todo-card--dragging': isDragging,
       'todo-card--overdue': isOverdueTodo,
+      'todo-card--due-today': isDueTodayTodo,
     }"
     draggable="true"
     @dragstart="onDragStart"
@@ -19,16 +20,27 @@
       <span class="todo-card__content" :title="todo.content" @click="handleEdit">
         {{ todo.content }}
       </span>
-      <div v-if="todo.plannedDate || isOverdueTodo" class="todo-card__meta">
-        <el-icon v-if="isOverdueTodo" color="#F56C6C"><Warning /></el-icon>
+      <div v-if="todo.plannedDate || isOverdueTodo || isDueTodayTodo" class="todo-card__meta">
+        <el-icon
+          v-if="isOverdueTodo"
+          color="#f56c6c"
+        ><Warning /></el-icon>
+        <el-icon
+          v-else-if="isDueTodayTodo"
+          color="#e6a23c"
+        ><Bell /></el-icon>
         <span
           v-if="todo.plannedDate"
           class="todo-card__date"
-          :class="{ 'todo-card__date--overdue': isOverdueTodo }"
+          :class="{
+            'todo-card__date--overdue': isOverdueTodo,
+            'todo-card__date--today': isDueTodayTodo,
+          }"
         >
           计划: {{ todo.plannedDate }}
         </span>
         <span v-if="isOverdueTodo" class="todo-card__overdue-label">已超时</span>
+        <span v-else-if="isDueTodayTodo" class="todo-card__today-label">今日到期</span>
       </div>
     </div>
     <el-dropdown trigger="click" @command="handleCommand">
@@ -48,8 +60,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Todo } from '@/types/todo'
-import { MoreFilled, Warning } from '@element-plus/icons-vue'
-import { isOverdue } from '@/utils/date'
+import { MoreFilled, Warning, Bell } from '@element-plus/icons-vue'
+import { isOverdue, isDueToday } from '@/utils/date'
 
 const props = defineProps<{
   todo: Todo
@@ -70,6 +82,12 @@ const isDragging = ref(false)
 const isOverdueTodo = computed(() => {
   if (props.completed) return false
   return isOverdue(props.todo.plannedDate)
+})
+
+const isDueTodayTodo = computed(() => {
+  if (props.completed) return false
+  if (isOverdueTodo.value) return false
+  return isDueToday(props.todo.plannedDate)
 })
 
 function onDragStart(event: DragEvent) {
@@ -158,6 +176,15 @@ function handleCommand(command: string) {
   background: #fde2e2;
 }
 
+.todo-card--due-today {
+  background: #fdf6ec;
+  border-left-color: #e6a23c;
+}
+
+.todo-card--due-today:hover {
+  background: #faecd8;
+}
+
 .todo-card__main {
   flex: 1;
   min-width: 0;
@@ -194,9 +221,24 @@ function handleCommand(command: string) {
   font-weight: 500;
 }
 
+.todo-card__date--today {
+  color: #e6a23c;
+  font-weight: 500;
+}
+
 .todo-card__overdue-label {
   color: #fff;
   background: #f56c6c;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+.todo-card__today-label {
+  color: #fff;
+  background: #e6a23c;
   padding: 0 6px;
   border-radius: 4px;
   font-size: 11px;

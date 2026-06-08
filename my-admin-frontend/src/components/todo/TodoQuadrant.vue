@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
-import type { Todo, QuadrantTodos } from '@/types/todo'
+import type { Todo } from '@/types/todo'
 import TodoCard from './TodoCard.vue'
 import { Lightning, Calendar, Clock, Delete, Plus } from '@element-plus/icons-vue'
 
@@ -86,10 +86,18 @@ function getIcon(name: string) {
   return iconMap[name] || Calendar
 }
 
-interface QuadrantData extends QuadrantTodos {
+interface QuadrantData {
+  id: number
+  quadrant: number
+  name: string
+  description: string
   color: string
   icon: string
-  name: string
+  quadrantName: string
+  quadrantDescription: string
+  uncompletedTodos: Todo[]
+  completedTodos: Todo[]
+  hasCompleted: boolean
 }
 
 const props = defineProps<{

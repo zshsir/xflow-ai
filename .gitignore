@@ -23,3 +23,17 @@ application.properties
 application.yml
 application-*.properties
 application-*.yml
+
+# Docker
+docker-compose.override.yml
+
+# SSL 证书（敏感）
+nginx/ssl/
+*.pem
+*.key
+
+# 部署数据
+mysql/data/
+logs/
+backups/
+

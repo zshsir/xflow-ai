@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { Todo, TodoRequest, QuadrantTodos, ExportResult, LoginRequest, LoginResponse, RegisterRequest } from '@/types/todo'
+import type { Todo, TodoRequest, QuadrantTodos, LoginRequest, LoginResponse, RegisterRequest, User } from '@/types/todo'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -71,7 +71,7 @@ export const todoApi = {
 
   /** 导出待办 */
   exportTodos: (month: string) =>
-    api.get<ExportResult>(`/todos/export?month=${month}`, {
+    api.get<Blob>(`/todos/export?month=${month}`, {
       responseType: 'blob',
     }),
 
