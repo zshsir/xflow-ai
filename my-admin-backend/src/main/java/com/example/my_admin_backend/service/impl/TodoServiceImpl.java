@@ -35,7 +35,20 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public List<QuadrantTodosDTO> getTodosByDate(LocalDate date, Long userId) {
-        List<Todo> todos = todoRepository.findByUserIdAndDueDateOrderByCreatedAtDesc(userId, date);
+        // 当日数据：用于已完成的待办（保持原"按日期看"的逻辑）
+        List<Todo> dateTodos = todoRepository.findByUserIdAndDueDateOrderByCreatedAtDesc(userId, date);
+        // 用户所有未完成的待办：无视 dueDate，让历史未完成项始终可见
+        List<Todo> allUncompletedTodos = todoRepository.findByUserIdAndIsCompletedFalseOrderByCreatedAtDesc(userId);
+
+        // 合并并按 id 去重
+        Map<Long, Todo> merged = new LinkedHashMap<>();
+        for (Todo t : dateTodos) {
+            merged.put(t.getId(), t);
+        }
+        for (Todo t : allUncompletedTodos) {
+            merged.putIfAbsent(t.getId(), t);
+        }
+        List<Todo> todos = new ArrayList<>(merged.values());
 
         List<TodoDTO> completedTodos = todos.stream()
                 .filter(Todo::getIsCompleted)

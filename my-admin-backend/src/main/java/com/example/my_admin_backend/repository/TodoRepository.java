@@ -32,6 +32,9 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     List<Todo> findByUserId(Long userId);
 
+    /** 获取用户所有未完成的待办（不限 dueDate），按创建时间倒序 */
+    List<Todo> findByUserIdAndIsCompletedFalseOrderByCreatedAtDesc(Long userId);
+
     /** 获取所有已完成的待办，按完成时间倒序 */
     List<Todo> findByUserIdAndIsCompletedTrueOrderByCompletedAtDesc(Long userId);
 }
