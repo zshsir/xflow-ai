@@ -42,10 +42,27 @@
 
     <!-- 已完成区域 (当天完成，显示灰色) -->
     <template v-if="quadrant.hasCompleted">
-      <div class="quadrant__divider">
-        <span>已完成 ({{ quadrant.completedTodos.length }})</span>
-      </div>
-      <div class="quadrant__list quadrant__list--completed">
+      <button
+        type="button"
+        class="quadrant__divider"
+        :aria-expanded="!isCompletedCollapsed"
+        @click.stop="isCompletedCollapsed = !isCompletedCollapsed"
+      >
+        <el-icon
+          class="quadrant__divider-chevron"
+          :class="{ 'is-collapsed': isCompletedCollapsed }"
+        >
+          <ArrowDown />
+        </el-icon>
+        <span class="quadrant__divider-label">
+          已完成 ({{ quadrant.completedTodos.length }})
+        </span>
+        <span class="quadrant__divider-line" />
+      </button>
+      <div
+        v-show="!isCompletedCollapsed"
+        class="quadrant__list quadrant__list--completed"
+      >
         <TodoCard
           v-for="todo in quadrant.completedTodos"
           :key="todo.id"
@@ -73,7 +90,7 @@ import { ref, watch, computed } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import type { Todo } from '@/types/todo'
 import TodoCard from './TodoCard.vue'
-import { Lightning, Calendar, Clock, Delete, Plus } from '@element-plus/icons-vue'
+import { Lightning, Calendar, Clock, Delete, Plus, ArrowDown } from '@element-plus/icons-vue'
 
 const iconMap: Record<string, any> = {
   Lightning,
@@ -114,6 +131,7 @@ const emit = defineEmits<{
 }>()
 
 const isDragOver = ref(false)
+const isCompletedCollapsed = ref(false)
 
 const uncompletedList = ref<Todo[]>([...props.quadrant.uncompletedTodos])
 
@@ -263,18 +281,51 @@ function handleDelete(id: number) {
 .quadrant__divider {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin: 12px 0 8px;
   font-size: 12px;
   color: var(--el-text-color-secondary);
   flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
 }
 
-.quadrant__divider::after {
-  content: '';
+.quadrant__divider:hover {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color-light);
+}
+
+.quadrant__divider:focus-visible {
+  outline: 2px solid var(--el-color-primary-light-5);
+  outline-offset: 2px;
+}
+
+.quadrant__divider-chevron {
+  transition: transform 0.2s;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.quadrant__divider-chevron.is-collapsed {
+  transform: rotate(-90deg);
+}
+
+.quadrant__divider-label {
+  flex-shrink: 0;
+}
+
+.quadrant__divider-line {
   flex: 1;
   height: 1px;
   background: var(--el-border-color);
+  margin-left: 4px;
 }
 
 .quadrant__empty {
