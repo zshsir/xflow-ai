@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -37,4 +38,16 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     /** 获取所有已完成的待办，按完成时间倒序 */
     List<Todo> findByUserIdAndIsCompletedTrueOrderByCompletedAtDesc(Long userId);
+
+    /**
+     * 获取某天完成的所有待办（按 completedAt 落地的日期筛选）
+     * 使用 [start, end) 半开区间，避免午夜的边界重复
+     */
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.isCompleted = true " +
+           "AND t.completedAt >= :start AND t.completedAt < :end " +
+           "ORDER BY t.completedAt DESC")
+    List<Todo> findCompletedOnDate(
+            @Param("userId") Long userId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
 }

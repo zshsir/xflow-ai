@@ -35,28 +35,22 @@ public class TodoServiceImpl implements TodoService {
 
     @Override
     public List<QuadrantTodosDTO> getTodosByDate(LocalDate date, Long userId) {
-        // 当日数据：用于已完成的待办（保持原"按日期看"的逻辑）
-        List<Todo> dateTodos = todoRepository.findByUserIdAndDueDateOrderByCreatedAtDesc(userId, date);
-        // 用户所有未完成的待办：无视 dueDate，让历史未完成项始终可见
-        List<Todo> allUncompletedTodos = todoRepository.findByUserIdAndIsCompletedFalseOrderByCreatedAtDesc(userId);
+        // 未完成的待办：无视 dueDate，让历史未完成项始终可见
+        List<Todo> uncompletedEntities = todoRepository
+                .findByUserIdAndIsCompletedFalseOrderByCreatedAtDesc(userId);
 
-        // 合并并按 id 去重
-        Map<Long, Todo> merged = new LinkedHashMap<>();
-        for (Todo t : dateTodos) {
-            merged.put(t.getId(), t);
-        }
-        for (Todo t : allUncompletedTodos) {
-            merged.putIfAbsent(t.getId(), t);
-        }
-        List<Todo> todos = new ArrayList<>(merged.values());
+        // 已完成的待办：按完成时间（completedAt）落地的那一天来归档，
+        // 而不是按原始 dueDate —— 这样 6/8 创建、6/9 勾选的会出现在 6/9
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
+        List<Todo> completedEntities = todoRepository
+                .findCompletedOnDate(userId, dayStart, dayEnd);
 
-        List<TodoDTO> completedTodos = todos.stream()
-                .filter(Todo::getIsCompleted)
+        List<TodoDTO> completedTodos = completedEntities.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
 
-        List<TodoDTO> uncompletedTodos = todos.stream()
-                .filter(t -> !t.getIsCompleted())
+        List<TodoDTO> uncompletedTodos = uncompletedEntities.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
 
